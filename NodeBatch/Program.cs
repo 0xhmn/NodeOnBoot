@@ -19,8 +19,6 @@ namespace NodeBatch
     {
         public static string PfxPath { get; set; }
         public static string PfxPassword { get; set; }
-        public static string CurrentDir { get; set; }
-        public static string UserDir { get; set; }
         public static bool DevMode { get; set; } = true;
         public static string NodeServerPath { get; set; }
 
@@ -28,16 +26,24 @@ namespace NodeBatch
 
         static void Main(string[] args)
         {
-            // get current directory
-            CurrentDir = System.IO.Directory.GetCurrentDirectory();
-            UserDir = System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+            if (GetNssm.HaveNssm())
+            {
+                Console.WriteLine("You Already Have NSSM Installed on Your Machine");
+            }
+            else
+            {
+                GetNssm.DownloadNssm();
+            }
+
+            CheckRootDir();
 
             SetNodeServerPath();
             GetSSHInfo();
             GenerateBatchFile(PfxPath, PfxPassword);
 
             Console.WriteLine("Done!");
-            Console.Read();
+            Console.ReadKey();
 
 
         }
@@ -70,8 +76,8 @@ namespace NodeBatch
         public static void GenerateBatchFile(string path, string pass)
         {
             const string homeDrive = "set HOMEDRIVE=C:";
-            string pm2Home = $"set PM2_HOME={UserDir}\\.pm2";
-            var dir = "cd " + CurrentDir; // or just "cd %~dp0"
+            string pm2Home = $"set PM2_HOME={ProjectConfig.GetUserDir()}\\.pm2";
+            var dir = "cd " + ProjectConfig.GetCurrentDir(); // or just "cd %~dp0"
             string command;
 
             if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(pass))
@@ -136,6 +142,16 @@ namespace NodeBatch
             }
 
             SetPfxInfo();
+        }
+
+        public static void CheckRootDir()
+        {
+            if (File.Exists(Path.Combine(ProjectConfig.GetCurrentDir(), "package.json"))) return;
+            Console.WriteLine("Make sure you have copied the file inside the Project's Root" +
+                              ", then try again");
+
+            Console.ReadKey();
+            Environment.Exit(0);
         }
 
     }
