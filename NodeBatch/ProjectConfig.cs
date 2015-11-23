@@ -28,5 +28,19 @@ namespace NodeBatch
         {
             return Path.Combine(GetRootFolder(), "nssm-2.24");
         }
+
+        public static string GetFullPath()
+        {
+            const string dirName = "NodeBatch";
+            const string fileName = "NodeSetup.bat";
+
+            var filePath = Path.Combine(dirName, fileName);
+            if (File.Exists(filePath))
+            {
+                var f = new FileInfo(filePath);
+                return f.FullName;
+            }
+            return null;
+        }
     }
 }

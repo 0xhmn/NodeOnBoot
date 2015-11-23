@@ -29,18 +29,30 @@ namespace NodeBatch
 
             if (GetNssm.HaveNssm())
             {
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("You Already Have NSSM Installed on Your Machine");
+                Console.ResetColor();
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("You need to install NSSM first ...");
                 GetNssm.DownloadNssm();
+                Console.ResetColor();
+                Console.ReadKey();
+                Environment.Exit(0);
             }
 
-            CheckRootDir();
+            //CheckRootDir();
 
             SetNodeServerPath();
             GetSSHInfo();
             GenerateBatchFile(PfxPath, PfxPassword);
+
+            // start nssm
+            GetNssm.StartSsm(ProjectConfig.GetFullPath());
+            //GetNssm.StartService();
+
 
             Console.WriteLine("Done!");
             Console.ReadKey();
@@ -101,7 +113,7 @@ namespace NodeBatch
             {
                 Directory.CreateDirectory(dirName);
             }
-            const string fileName = "test.bat";
+            const string fileName = "NodeSetup.bat";
 
             var filePath = Path.Combine(dirName, fileName);
             if (!File.Exists(filePath))
