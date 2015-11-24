@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
@@ -17,7 +18,7 @@ namespace NodeBatch
             var rooDirectories =  Directory.GetDirectories(@"C:\ProgramData\chocolatey\lib");
             var rgx = new Regex(@"(?i:nssm)");
             return rooDirectories.Any(dir => rgx.IsMatch(dir));
-        }
+        } 
 
         public static bool DownloadNssm()
         {

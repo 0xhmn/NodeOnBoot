@@ -27,31 +27,30 @@ namespace NodeBatch
         static void Main(string[] args)
         {
 
-            if (GetNssm.HaveNssm())
+            #region CHECKING DEPENDENCIES
+            if (!Dependencies.HasNode())
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("You Already Have NSSM Installed on Your Machine");
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.WriteLine("Couldn't find Node.js");
                 Console.ResetColor();
+
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("You need to install NSSM first ...");
-                GetNssm.DownloadNssm();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Node is installed");
                 Console.ResetColor();
-                Console.ReadKey();
-                Environment.Exit(0);
+
             }
+            Dependencies.InstallNpm();
+            #endregion
+
 
             //CheckRootDir();
 
             SetNodeServerPath();
             GetSSHInfo();
-            GenerateBatchFile(PfxPath, PfxPassword);
-
-            // start nssm
-            GetNssm.StartSsm(ProjectConfig.GetFullPath());
-            //GetNssm.StartService();
+            RunPm2(PfxPath, PfxPassword);
 
 
             Console.WriteLine("Done!");
@@ -69,21 +68,7 @@ namespace NodeBatch
             Console.WriteLine("New path has been set");
         }
 
-        // get path and password
-        public static void SetPfxInfo()
-        {
-            var flag = true;
-            while (flag)
-            {
-                Console.WriteLine("Enter you PFX file path:");
-                PfxPath = Console.ReadLine();
-                Console.WriteLine("Enter you PFX password:");
-                PfxPassword = Console.ReadLine();
 
-                flag = (string.IsNullOrEmpty(PfxPath) || PfxPath.Length == 0 || string.IsNullOrEmpty(PfxPassword) ||
-                        PfxPassword.Length == 0);
-            }
-        }
 
         public static void GenerateBatchFile(string path, string pass)
         {
@@ -145,15 +130,43 @@ namespace NodeBatch
 
         public static void GetSSHInfo()
         {
-            Console.WriteLine("Using SSH config? (y/n)");
-            if (Console.ReadLine() != "y") return;
-            Console.WriteLine("Development Mode? (y/n)");
-            if (Console.ReadLine() == "n")
+            do
             {
-                DevMode = false;
-            }
+                Console.WriteLine("Using SSH config? (y/n)");
+                var ans = Console.ReadLine();
+                if (ans == "n") return;
+                else if (ans == "y") break;
+                else { Console.WriteLine("y or n");}
+            } while (true);
+
+            do
+            {
+                Console.WriteLine("Development Mode? (y/n)");
+                var ans = Console.ReadLine();
+                if (ans == "n")
+                {
+                    DevMode = false;
+                    break;
+                } else if (ans == "y") break;
+                Console.WriteLine("y or n");
+            } while (true);
 
             SetPfxInfo();
+        }
+
+        public static void SetPfxInfo()
+        {
+            var flag = true;
+            while (flag)
+            {
+                Console.WriteLine("Enter you PFX file path:");
+                PfxPath = Console.ReadLine();
+                Console.WriteLine("Enter you PFX password:");
+                PfxPassword = Console.ReadLine();
+
+                flag = (string.IsNullOrEmpty(PfxPath) || PfxPath.Length == 0 || string.IsNullOrEmpty(PfxPassword) ||
+                        PfxPassword.Length == 0);
+            }
         }
 
         public static void CheckRootDir()
@@ -164,6 +177,36 @@ namespace NodeBatch
 
             Console.ReadKey();
             Environment.Exit(0);
+        }
+
+        public static void RunPm2(string path, string pass)
+        {
+
+            string command = null;
+
+            if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(pass))
+            {
+                command = $"/C pm2 start {NodeServerPath} && pm2 save";
+            }
+            else
+            {
+                if (DevMode)
+                {
+                    command = $"/C pm2 start server\\bin\\www --  -p {pass} -a \"{path}\" && pm2 save";
+                }
+                else
+                {
+                    command = $"/C pm2 start server\\bin\\www -i 0 --  -p {pass} -a \"{path}\" && pm2 save";
+                }
+            }
+
+            Process process = new Process();
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = "cmd.exe";
+            info.Arguments = command;
+            process.StartInfo = info;
+            process.Start();
+
         }
 
     }
