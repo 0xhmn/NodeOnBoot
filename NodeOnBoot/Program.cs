@@ -1,16 +1,8 @@
 ﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.Mime;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NodeBatch
+namespace NodeOnBoot
 {
     /// <summary>
     /// Generating a batch file based on SSH path and password

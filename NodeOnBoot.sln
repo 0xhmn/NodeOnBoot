@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeBatch", "NodeBatch\NodeBatch.csproj", "{6BFDED6B-236D-435B-8B26-39A62B19DD40}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeOnBoot", "NodeOnBoot\NodeOnBoot.csproj", "{6BFDED6B-236D-435B-8B26-39A62B19DD40}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

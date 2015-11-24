@@ -7,8 +7,8 @@
     <ProjectGuid>{6BFDED6B-236D-435B-8B26-39A62B19DD40}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NodeBatch</RootNamespace>
-    <AssemblyName>NodeBatch</AssemblyName>
+    <RootNamespace>NodeOnBoot</RootNamespace>
+    <AssemblyName>NodeOnBoot</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
