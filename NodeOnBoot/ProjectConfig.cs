@@ -25,15 +25,11 @@ namespace NodeOnBoot
             return Path.Combine(GetRootFolder(), "nssm-2.24");
         }
 
-        public static string GetFullPath()
+        public static string GetFullPath(string fileName)
         {
-            const string dirName = "NodeBatch";
-            const string fileName = "NodeSetup.bat";
-
-            var filePath = Path.Combine(dirName, fileName);
-            if (File.Exists(filePath))
+            if (File.Exists(fileName))
             {
-                var f = new FileInfo(filePath);
+                var f = new FileInfo(fileName);
                 return f.FullName;
             }
             return null;

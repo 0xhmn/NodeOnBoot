@@ -5,21 +5,35 @@ using System.IO;
 namespace NodeOnBoot
 {
     /// <summary>
-    /// Generating a batch file based on SSH path and password
+    /// Generating a batch file based on SSL path and password
     /// </summary>
     class Program
     {
         public static string PfxPath { get; set; }
         public static string PfxPassword { get; set; }
         public static bool DevMode { get; set; } = true;
+        public static bool SslMode { get; set; } = false;
         public static string NodeServerPath { get; set; }
+        public static bool UsingPm2 { get; set; } = true;
+        public static bool UsingNode { get; set; } = false;
 
 
 
         static void Main(string[] args)
         {
 
+
+
+
+
+            /**
+            WinStartupRegistry.GetCurrentStartups();
+            WinStartupRegistry.SetKeyVal("NodeTest", @"d:\Test\node_batch>\test.cmd");
+            WinStartupRegistry.GetCurrentStartups();
+            **/
+
             #region CHECKING DEPENDENCIES
+
             if (!Dependencies.HasNode())
             {
                 Console.BackgroundColor = ConsoleColor.Red;
@@ -32,23 +46,63 @@ namespace NodeOnBoot
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Node is installed");
                 Console.ResetColor();
-
             }
-            Dependencies.InstallNpm();
+
+            Pm2OrNode();
+
+            if (UsingPm2)
+            {
+                Dependencies.InstallNpm();  // only if pm2 is selected
+            }
+
             #endregion
 
+            #region SETTING UP
 
             //CheckRootDir();
-
             SetNodeServerPath();
-            GetSSHInfo();
-            RunPm2(PfxPath, PfxPassword);
+            if (UsingPm2)
+            {
+                GetSSLInfo();
+                RunPm2(PfxPath, PfxPassword);
+            }
+            else
+            {
+                RunNode();
+            }
+            
 
 
             Console.WriteLine("Done!");
             Console.ReadKey();
+            #endregion
+            
+        }
 
-
+        public static void Pm2OrNode()
+        {
+            Console.WriteLine("Which One Do You Want to Use? (defaule: Pm2)");
+            Console.WriteLine("Note that if you want to use a SSL Certificates you need to choose Pm2");
+            do
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("  Node [1]\tPm2 [2]\n");
+                Console.ResetColor();
+                var ans = Console.ReadLine();
+                if (ans == "1")
+                {
+                    UsingNode = true;
+                    UsingPm2 = false;
+                    return;
+                }
+                else if (ans == "2")
+                {
+                    UsingNode = false;
+                    UsingPm2 = true;
+                    return;
+                }
+                Console.WriteLine("1 or 2");
+            } while (true);
         }
 
         public static void SetNodeServerPath()
@@ -64,6 +118,13 @@ namespace NodeOnBoot
 
         public static void GenerateBatchFile(string path, string pass)
         {
+
+            // if pm2 -> 1/devmode 2/producMode
+
+
+
+
+
             const string homeDrive = "set HOMEDRIVE=C:";
             string pm2Home = $"set PM2_HOME={ProjectConfig.GetUserDir()}\\.pm2";
             var dir = "cd " + ProjectConfig.GetCurrentDir(); // or just "cd %~dp0"
@@ -120,14 +181,19 @@ namespace NodeOnBoot
 
         }
 
-        public static void GetSSHInfo()
+        public static void GetSSLInfo()
         {
             do
             {
-                Console.WriteLine("Using SSH config? (y/n)");
+                Console.WriteLine("Using SSL config? (y/n)");
                 var ans = Console.ReadLine();
-                if (ans == "n") return;
-                else if (ans == "y") break;
+                if (ans == "n") break;
+                else if (ans == "y")
+                {
+                    SetPfxInfo();
+                    SslMode = true;
+                    break;
+                }
                 else { Console.WriteLine("y or n");}
             } while (true);
 
@@ -142,8 +208,6 @@ namespace NodeOnBoot
                 } else if (ans == "y") break;
                 Console.WriteLine("y or n");
             } while (true);
-
-            SetPfxInfo();
         }
 
         public static void SetPfxInfo()
@@ -176,20 +240,14 @@ namespace NodeOnBoot
 
             string command = null;
 
-            if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(pass))
+            if (DevMode)
             {
-                command = $"/C pm2 start {NodeServerPath} && pm2 save";
+                command = SslMode ? $"/C pm2 start {ProjectConfig.GetFullPath(NodeServerPath)} --  -p {pass} -a \"{path}\" && pm2 save" : $"/C pm2 start {ProjectConfig.GetFullPath(NodeServerPath)} && pm2 save";
             }
+            // production mode
             else
             {
-                if (DevMode)
-                {
-                    command = $"/C pm2 start server\\bin\\www --  -p {pass} -a \"{path}\" && pm2 save";
-                }
-                else
-                {
-                    command = $"/C pm2 start server\\bin\\www -i 0 --  -p {pass} -a \"{path}\" && pm2 save";
-                }
+                command = SslMode ? $"/C pm2 start {ProjectConfig.GetFullPath(NodeServerPath)} -i 0 --  -p {pass} -a \"{path}\" && pm2 save" : $"/C pm2 start {ProjectConfig.GetFullPath(NodeServerPath)} -i 0 && pm2 save";
             }
 
             Process process = new Process();
@@ -199,6 +257,17 @@ namespace NodeOnBoot
             process.StartInfo = info;
             process.Start();
 
+        }
+
+        public static void RunNode()
+        {
+            string command = $"/C node {ProjectConfig.GetFullPath(NodeServerPath)}";
+            Process process = new Process();
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = "cmd.exe";
+            info.Arguments = command;
+            process.StartInfo = info;
+            process.Start();
         }
 
     }

@@ -41,12 +41,12 @@ namespace NodeOnBoot
 
         public static void InstallNpm()
         {
+            // TODO: check if installing pm2 is not necessary
+            
             // install pm2
             string[] npmDependencies =
             {
-                "/C npm install -g pm2",
-                "/C npm install -g pm2-windows-startup && pm2-startup install"
-            };
+                "/C npm install -g pm2"            };
 
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
