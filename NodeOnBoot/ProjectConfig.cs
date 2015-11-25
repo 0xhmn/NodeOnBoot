@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace NodeOnBoot
 {
@@ -33,6 +34,16 @@ namespace NodeOnBoot
                 return f.FullName;
             }
             return null;
+        }
+
+        public static string GetBatchDirecotry()
+        {
+            const string dirName = "NodeOnBoot";
+            if (!Directory.Exists(dirName))
+            {
+                Directory.CreateDirectory(dirName);
+            }
+            return dirName;
         }
     }
 }

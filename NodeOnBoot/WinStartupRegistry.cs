@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,14 +11,12 @@ namespace NodeOnBoot
     class WinStartupRegistry
     {
         public static RegistryKey RegKey { get; set; }
-        public static string test { get; set; }
 
         static WinStartupRegistry()
         {
             RegKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
         }
 
-        // test the current startup programs
         public static bool GetCurrentStartups()
         {
             if (RegKey == null) return false;
@@ -31,6 +30,13 @@ namespace NodeOnBoot
             return true;
         }
 
+        /// <summary>
+        /// setting up key and value on win registry
+        /// name as key and path as value
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static bool SetKeyVal(string name, string path)
         {
             if (RegKey == null) return false;
@@ -51,5 +57,41 @@ namespace NodeOnBoot
             return subValueNames.Any(v => v.Equals(name));
         }
 
+        public static bool RegisterWithNode(string batchFilePath)
+        {
+            var fileName = System.IO.Path.GetFileName(batchFilePath);
+            SetKeyVal(fileName, batchFilePath);
+
+            return true;
+        }
+
+        // generate a batch file with unique name
+        public static string GenerateBatchFile(string fullJsPath, bool usePm2)
+        {
+            var command = usePm2 ? "pm2 resurrect" : $"node {fullJsPath}";
+
+            var dirName = ProjectConfig.GetBatchDirecotry();
+            var fileName = "NodeSetup_" + System.IO.Path.GetRandomFileName() + ".bat";
+            var batchFilePath = Path.Combine(dirName, fileName);
+            if (!File.Exists(batchFilePath))
+            {
+                using (var writer = new StreamWriter(batchFilePath))
+                {
+                    writer.WriteLine(command);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Another confige file exists, do you want to overwrite the file?(y/n)");
+                if (Console.ReadLine() == "y")
+                {
+                    using (var writer = new StreamWriter(batchFilePath, false)) // overwrite the existing batch
+                    {
+                        writer.WriteLine(command);
+                    }
+                }      
+            }
+            return ProjectConfig.GetFullPath(batchFilePath);
+        }
     }
 }

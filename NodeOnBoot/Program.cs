@@ -23,9 +23,6 @@ namespace NodeOnBoot
         {
 
 
-
-
-
             /**
             WinStartupRegistry.GetCurrentStartups();
             WinStartupRegistry.SetKeyVal("NodeTest", @"d:\Test\node_batch>\test.cmd");
@@ -70,9 +67,9 @@ namespace NodeOnBoot
             {
                 RunNode();
             }
-            
 
 
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Done!");
             Console.ReadKey();
             #endregion
@@ -257,17 +254,26 @@ namespace NodeOnBoot
             process.StartInfo = info;
             process.Start();
 
+            // generate batch file and register
+            var batchFilePath = WinStartupRegistry.GenerateBatchFile(null, true);
+            WinStartupRegistry.RegisterWithNode(batchFilePath);
         }
 
         public static void RunNode()
         {
-            string command = $"/C node {ProjectConfig.GetFullPath(NodeServerPath)}";
+            var serverFullPath = ProjectConfig.GetFullPath(NodeServerPath);
+
+            string command = $"/C node {serverFullPath}";
             Process process = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
             info.FileName = "cmd.exe";
             info.Arguments = command;
             process.StartInfo = info;
             process.Start();
+
+            // make batch file and register
+            var batchFilePath = WinStartupRegistry.GenerateBatchFile(serverFullPath, false);
+            WinStartupRegistry.RegisterWithNode(batchFilePath);
         }
 
     }
