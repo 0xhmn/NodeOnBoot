@@ -46,9 +46,9 @@
   <ItemGroup>
     <Compile Include="Dependencies.cs" />
     <Compile Include="ProjectConfig.cs" />
-    <Compile Include="GetNssm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerSetup.cs" />
     <Compile Include="WinStartupRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
