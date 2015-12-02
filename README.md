@@ -1,7 +1,7 @@
 ## Functionality
 NodeOnBoot is a simple application that autostarts a node.js server after booting on Windows.
 
-<img src="http://i.imgur.com/GfTyWiR.png" alt="NodeOnBoot" style="width:450px;">
+<img src="http://i.imgur.com/x8eHBgx.png" alt="NodeOnBoot">
 
 ## How to use
 Compile the project and put the binary file in your porject root, execute it and follow the steps.
